@@ -13,4 +13,5 @@
 - Keep Yimiya feature UI in `src/components/yimiya` and use leaf routes for public content, so the chat remains the root experience and each page has independent metadata.
 - Use a single browser-only demo state provider for conversations and preferences; account screens simulate access without storing passwords, so a future backend can replace demo operations without changing the presentation.
 - Compose transcript, markdown, code, composer and loading states from installed AI Elements primitives to retain compatible chat foundations.
+- Register Streamdown's distributed source in the Tailwind stylesheet so markdown syntax colors and code action positioning are included in generated styles.
 - Keep personality preferences separate from immutable safety expectations; local illustrative responses never represent a connected model or a real moderation service.
