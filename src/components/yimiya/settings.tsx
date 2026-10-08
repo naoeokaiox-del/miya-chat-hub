@@ -1,0 +1,369 @@
+import { useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import {
+  Check,
+  FileText,
+  Fingerprint,
+  LockKeyhole,
+  LogOut,
+  Palette,
+  Shield,
+  ShieldCheck,
+  SlidersHorizontal,
+  Trash2,
+  User,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AppShell } from "./shell";
+import { useYimiya, type Preferences } from "./store";
+const tabs = [
+  { name: "Personalidade", icon: SlidersHorizontal },
+  { name: "Aparência", icon: Palette },
+  { name: "Conta", icon: User },
+  { name: "Privacidade", icon: Fingerprint },
+  { name: "Segurança", icon: LockKeyhole },
+];
+const personalities = [
+  "Padrão",
+  "Amigável",
+  "Profissional",
+  "Direta",
+  "Criativa",
+  "Técnica",
+  "Personalizada",
+];
+export function SettingsPage() {
+  const { prefs, updatePrefs, clearChats, demoSignedIn, demoLogout } = useYimiya();
+  const [tab, setTab] = useState("Personalidade");
+  const [draft, setDraft] = useState<Preferences>(prefs);
+  const [confirm, setConfirm] = useState(false);
+  const navigate = useNavigate();
+  const update = (patch: Partial<Preferences>) => setDraft((current) => ({ ...current, ...patch }));
+  const save = () => {
+    updatePrefs(draft);
+    toast.success("Preferências salvas neste navegador.");
+  };
+  return (
+    <AppShell title="Configurações">
+      <div className="content-page">
+        <div className="page-eyebrow">DO SEU JEITO</div>
+        <h1 className="page-heading">Configurações</h1>
+        <p className="page-description">Seu espaço. Suas preferências.</p>
+        <div className="settings-layout">
+          <nav className="settings-nav" aria-label="Categorias de configurações">
+            {tabs.map(({ name, icon: Icon }) => (
+              <Button
+                key={name}
+                variant="ghost"
+                className={`settings-tab ${tab === name ? "selected" : ""}`}
+                onClick={() => setTab(name)}
+              >
+                <Icon />
+                {name}
+              </Button>
+            ))}
+            <div className="settings-nav-divider" />
+            <Button asChild variant="ghost" className="settings-tab">
+              <Link to="/termos-de-uso">
+                <FileText />
+                Termos de Uso
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" className="settings-tab">
+              <Link to="/politica-de-privacidade">
+                <Shield />
+                Política de Privacidade
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" className="settings-tab">
+              <Link to="/politica-de-uso-da-ia">
+                <ShieldCheck />
+                Política de Uso da IA
+              </Link>
+            </Button>
+          </nav>
+          <section className="settings-content">
+            {tab === "Personalidade" && (
+              <>
+                <h2>Personalidade da Miya</h2>
+                <p>Escolha o estilo que combina com a sua conversa.</p>
+                <div className="settings-section">
+                  <h3>Estilo de conversa</h3>
+                  <div className="personality-grid">
+                    {personalities.map((name) => (
+                      <Button
+                        key={name}
+                        variant="outline"
+                        className={`personality-option ${draft.personality === name ? "selected" : ""}`}
+                        onClick={() => update({ personality: name })}
+                      >
+                        {draft.personality === name && <Check className="size-3" />}
+                        {name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div className="settings-section">
+                  <h3>Tom da conversa</h3>
+                  <Slider
+                    aria-label="Tom da conversa"
+                    value={[draft.tone]}
+                    onValueChange={([tone]) => {
+                      if (tone !== undefined) update({ tone });
+                    }}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                  <div className="range-labels">
+                    <span>Mais sério</span>
+                    <span>Mais descontraído</span>
+                  </div>
+                </div>
+                <div className="settings-section">
+                  <h3>Tamanho das respostas</h3>
+                  <Slider
+                    aria-label="Tamanho das respostas"
+                    value={[draft.length]}
+                    onValueChange={([length]) => {
+                      if (length !== undefined) update({ length });
+                    }}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                  <div className="range-labels">
+                    <span>Curtas</span>
+                    <span>Detalhadas</span>
+                  </div>
+                </div>
+                <div className="settings-section">
+                  <label className="form-label" htmlFor="custom-personality">
+                    Personalidade personalizada
+                  </label>
+                  <Textarea
+                    id="custom-personality"
+                    rows={4}
+                    maxLength={2000}
+                    placeholder="Quero respostas diretas, sem muita enrolação e com exemplos."
+                    value={draft.custom}
+                    onChange={(e) => update({ custom: e.target.value })}
+                  />
+                  <p className="mt-2 text-right text-xs text-muted-foreground">
+                    {draft.custom.length}/2000
+                  </p>
+                </div>
+                <div className="safety-note">
+                  <ShieldCheck />
+                  <span>
+                    Preferências mudam o estilo, não os limites de segurança da Yimiya. Nesta
+                    demonstração, os estilos são simulados.
+                  </span>
+                </div>
+              </>
+            )}
+            {tab === "Aparência" && (
+              <>
+                <h2>Aparência</h2>
+                <p>Uma experiência confortável para suas conversas.</p>
+                <div className="setting-row">
+                  <div>
+                    <strong>Tema</strong>
+                    <p>Grafite com a identidade magenta da Yimiya.</p>
+                  </div>
+                  <span className="text-xs text-primary">Escuro</span>
+                </div>
+                <div className="setting-row">
+                  <div>
+                    <strong>Mensagens compactas</strong>
+                    <p>Texto mais compacto nas respostas da Miya.</p>
+                  </div>
+                  <Switch
+                    aria-label="Mensagens compactas"
+                    checked={draft.compact}
+                    onCheckedChange={(compact) => update({ compact })}
+                  />
+                </div>
+              </>
+            )}
+            {tab === "Conta" && (
+              <>
+                <h2>Seu perfil</h2>
+                <p>
+                  {demoSignedIn
+                    ? "Sua conta está em modo demonstrativo."
+                    : "Você está explorando como visitante."}
+                </p>
+                <div className="form-field">
+                  <label className="form-label" htmlFor="profile-name">
+                    Nome de exibição
+                  </label>
+                  <Input
+                    id="profile-name"
+                    maxLength={60}
+                    value={draft.name}
+                    onChange={(e) => update({ name: e.target.value })}
+                  />
+                </div>
+                <div className="form-field">
+                  <label className="form-label" htmlFor="profile-email">
+                    E-mail
+                  </label>
+                  <Input
+                    id="profile-email"
+                    type="email"
+                    value={draft.email}
+                    onChange={(e) => update({ email: e.target.value })}
+                    placeholder="voce@exemplo.com"
+                  />
+                </div>
+                <div className="setting-row">
+                  <div>
+                    <strong>Status da conta</strong>
+                    <p>Nenhuma conta real foi criada nesta versão.</p>
+                  </div>
+                  <span className="text-xs text-primary">Demonstração</span>
+                </div>
+                {demoSignedIn ? (
+                  <Button
+                    variant="outline"
+                    className="mt-6"
+                    onClick={() => {
+                      demoLogout();
+                      navigate({ to: "/login", replace: true });
+                    }}
+                  >
+                    <LogOut />
+                    Sair da demonstração
+                  </Button>
+                ) : (
+                  <Button asChild variant="outline" className="mt-6">
+                    <Link to="/login">Entrar na Yimiya</Link>
+                  </Button>
+                )}
+              </>
+            )}
+            {tab === "Privacidade" && (
+              <>
+                <h2>Privacidade</h2>
+                <p>Você controla o que fica neste dispositivo.</p>
+                <div className="setting-row">
+                  <div>
+                    <strong>Salvar histórico neste navegador</strong>
+                    <p>As conversas são locais e não são enviadas a uma IA.</p>
+                  </div>
+                  <Switch
+                    aria-label="Salvar histórico neste navegador"
+                    checked={draft.saveHistory}
+                    onCheckedChange={(saveHistory) => update({ saveHistory })}
+                  />
+                </div>
+                <div className="setting-row">
+                  <div>
+                    <strong>Excluir todas as conversas</strong>
+                    <p>Remove também as conversas de exemplo.</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Excluir todas as conversas"
+                    onClick={() => setConfirm(true)}
+                  >
+                    <Trash2 className="text-destructive" />
+                  </Button>
+                </div>
+                <div className="safety-note">
+                  <Fingerprint />
+                  <span>
+                    Evite compartilhar informações pessoais ou sensíveis na demonstração,
+                    especialmente em dispositivos compartilhados.
+                  </span>
+                </div>
+              </>
+            )}
+            {tab === "Segurança" && (
+              <>
+                <h2>Segurança da conta</h2>
+                <p>A proteção do seu acesso vem em primeiro lugar.</p>
+                <div className="setting-row">
+                  <div>
+                    <strong>Senha</strong>
+                    <p>Senhas não são armazenadas nesta demonstração.</p>
+                  </div>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/recuperar-senha">Recuperar senha</Link>
+                  </Button>
+                </div>
+                <div className="setting-row">
+                  <div>
+                    <strong>Verificação em duas etapas</strong>
+                    <p>Disponível após a conexão do serviço de contas.</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Em breve</span>
+                </div>
+                <div className="setting-row">
+                  <div>
+                    <strong>Sessões e dispositivos</strong>
+                    <p>Acesso demonstrativo somente neste navegador.</p>
+                  </div>
+                  <span className="text-xs text-success">Este dispositivo</span>
+                </div>
+              </>
+            )}
+            <div className="settings-actions">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setDraft(prefs);
+                  toast("Alterações descartadas.");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button onClick={save}>
+                <Check />
+                Salvar preferências
+              </Button>
+            </div>
+          </section>
+        </div>
+      </div>
+      <AlertDialog open={confirm} onOpenChange={setConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir todas as conversas?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O histórico deste navegador será removido. Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                clearChats();
+                toast.success("Histórico excluído.");
+              }}
+            >
+              Excluir conversas
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </AppShell>
+  );
+}
