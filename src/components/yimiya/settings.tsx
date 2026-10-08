@@ -123,7 +123,9 @@ export function SettingsPage() {
                   <Slider
                     aria-label="Tom da conversa"
                     value={[draft.tone]}
-                    onValueChange={([tone]) => { if (tone !== undefined) update({ tone }); }}
+                    onValueChange={([tone]) => {
+                      if (tone !== undefined) update({ tone });
+                    }}
                     min={0}
                     max={100}
                     step={1}
@@ -138,7 +140,9 @@ export function SettingsPage() {
                   <Slider
                     aria-label="Tamanho das respostas"
                     value={[draft.length]}
-                    onValueChange={([length]) => { if (length !== undefined) update({ length }); }}
+                    onValueChange={([length]) => {
+                      if (length !== undefined) update({ length });
+                    }}
                     min={0}
                     max={100}
                     step={1}
