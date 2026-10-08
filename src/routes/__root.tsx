@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { YimiyaProvider } from "@/components/yimiya/store";
+import { Toaster } from "sonner";
 
 function NotFoundComponent() {
   return (
@@ -121,7 +123,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <YimiyaProvider><Outlet /><Toaster theme="dark" position="bottom-right" /></YimiyaProvider>
     </QueryClientProvider>
   );
 }
