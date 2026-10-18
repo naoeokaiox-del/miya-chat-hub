@@ -99,7 +99,7 @@ export function ChatPage() {
       setCopied(id);
       setTimeout(() => setCopied(null), 1800);
     } catch {
-      toast.error("Não foi possível copiar. Tente selecionar o texto.");
+: "Conectado · Miya AI v1.0"}
     }
   }
   return (

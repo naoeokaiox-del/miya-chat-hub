@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+
 export type ChatMessage = { id: string; role: "user" | "assistant"; text: string };
 export type Chat = {
   id: string;
@@ -7,6 +8,7 @@ export type Chat = {
   messages: ChatMessage[];
   example?: boolean;
 };
+
 export type Preferences = {
   personality: string;
   tone: number;
@@ -17,6 +19,7 @@ export type Preferences = {
   name: string;
   email: string;
 };
+
 const defaults: Preferences = {
   personality: "Padrão",
   tone: 35,
@@ -27,6 +30,7 @@ const defaults: Preferences = {
   name: "Visitante",
   email: "",
 };
+
 const examples: Chat[] = [
   {
     id: "example-1",
@@ -38,7 +42,7 @@ const examples: Chat[] = [
       {
         id: "e2",
         role: "assistant",
-        text: "**Conversa de exemplo**\n\nComece por autenticação, autorização e validação de entrada. Use HTTPS, limites de requisições e registros sem dados sensíveis.\n\nPara cada endpoint, verifique se o usuário tem permissão de acessar o recurso solicitado.",
+        text: "Comece por autenticação, autorização e validação de entrada. Use HTTPS, limites de requisições e registros sem dados sensíveis.\n\nPara cada endpoint, verifique se o usuário tem permissão de acessar o recurso solicitado.",
       },
     ],
   },
@@ -52,39 +56,12 @@ const examples: Chat[] = [
       {
         id: "e4",
         role: "assistant",
-        text: '**Conversa de exemplo**\n\nSepare código, testes e configurações. Use um ambiente virtual e mantenha as dependências em um arquivo próprio.\n\n```python\ndef main():\n    print("Olá, mundo!")\n\nif __name__ == "__main__":\n    main()\n```',
-      },
-    ],
-  },
-  {
-    id: "example-3",
-    title: "Ideias para um novo projeto",
-    updated: Date.now() - 86400000,
-    example: true,
-    messages: [
-      { id: "e5", role: "user", text: "Me ajude a pensar em um projeto." },
-      {
-        id: "e6",
-        role: "assistant",
-        text: "**Conversa de exemplo**\n\nUma boa ideia nasce de um problema concreto. Pense em uma tarefa repetitiva do seu dia e em como você poderia simplificá-la.",
-      },
-    ],
-  },
-  {
-    id: "example-4",
-    title: "Entendendo modelos de linguagem",
-    updated: Date.now() - 3 * 86400000,
-    example: true,
-    messages: [
-      { id: "e7", role: "user", text: "O que são modelos de linguagem?" },
-      {
-        id: "e8",
-        role: "assistant",
-        text: "**Conversa de exemplo**\n\nSão modelos treinados para identificar padrões em texto e gerar sequências de palavras. Suas respostas podem conter erros e precisam ser verificadas.",
+        text: 'Separe código, testes e configurações. Use um ambiente virtual e mantenha as dependências em um arquivo próprio.\n\n```python\ndef main():\n    print("Olá, mundo!")\n\nif __name__ == "__main__":\n    main()\n```',
       },
     ],
   },
 ];
+
 type Store = {
   chats: Chat[];
   activeId: string | null;
@@ -92,7 +69,7 @@ type Store = {
   newChat: () => void;
   deleteChat: (id: string) => void;
   clearChats: () => void;
-  send: (text: string) => void;
+  send: (text: string) => Promise<void>;
   pendingId: string | null;
   stop: () => void;
   prefs: Preferences;
@@ -102,33 +79,10 @@ type Store = {
   demoLogout: () => void;
   ready: boolean;
 };
+
 const StoreContext = createContext<Store | null>(null);
 const STORAGE_KEY = "yimiya-frontend-demo-v1";
-function demoResponse(text: string, prefs: Preferences) {
-  const serious = prefs.tone < 50;
-  const intro =
-    prefs.personality === "Direta"
-      ? ""
-      : serious
-        ? "Vamos por partes.\n\n"
-        : "Vamos explorar isso juntos.\n\n";
-  let body =
-    "Esta é uma resposta de demonstração. A Miya ainda não está conectada a um modelo de inteligência artificial.\n\nVocê pode continuar esta conversa para experimentar a interface.";
-  if (/python/i.test(text))
-    body =
-      "**Exemplo em Python**\n\nUma função simples para filtrar números pares:\n\n```python\ndef numeros_pares(numeros: list[int]) -> list[int]:\n    return [n for n in numeros if n % 2 == 0]\n\nprint(numeros_pares([1, 2, 3, 4, 5, 6]))\n# [2, 4, 6]\n```\n\nA compreensão de lista percorre os valores e mantém aqueles cujo resto da divisão por 2 é zero.";
-  else if (/api|seguran|vulnerab/i.test(text))
-    body =
-      '**Segurança de APIs**\n\n1. **Autenticação:** valide a identidade de quem faz a requisição.\n2. **Autorização:** verifique o acesso a cada recurso, não apenas ao endpoint.\n3. **Validação:** trate toda entrada como não confiável.\n4. **Proteção:** use HTTPS e limites de requisições.\n5. **Monitoramento:** registre eventos sem expor credenciais.\n\n```python\n# Exemplo defensivo de validação\ndef validar_id(valor: str) -> int:\n    if not valor.isdigit():\n        raise ValueError("ID inválido")\n    return int(valor)\n```';
-  if (prefs.length < 30) body = body.split("\n\n").slice(0, 2).join("\n\n");
-  if (prefs.length > 75)
-    body +=
-      "\n\n**Próximo passo**\n\nTeste cada mudança em um ambiente controlado. Revise os resultados e a documentação oficial antes de usar em produção.";
-  if (prefs.personality === "Personalizada" && prefs.custom)
-    body +=
-      "\n\nSua preferência personalizada foi salva para a futura conexão da Miya. Nesta demonstração, apenas os estilos predefinidos são simulados.";
-  return `${intro}${body}\n\n*Resposta ilustrativa local · nenhuma IA conectada.*`;
-}
+
 export function YimiyaProvider({ children }: { children: ReactNode }) {
   const [chats, setChats] = useState<Chat[]>(examples);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -136,7 +90,8 @@ export function YimiyaProvider({ children }: { children: ReactNode }) {
   const [demoSignedIn, setSignedIn] = useState(false);
   const [ready, setReady] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -147,13 +102,11 @@ export function YimiyaProvider({ children }: { children: ReactNode }) {
         setSignedIn(saved.demoSignedIn === true);
       }
     } catch {
-      /* Invalid or unavailable local demo storage: use defaults. */
+      /* Usa os padrões em caso de falha no storage */
     }
     setReady(true);
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
   }, []);
+
   useEffect(() => {
     if (!ready) return;
     try {
@@ -162,47 +115,107 @@ export function YimiyaProvider({ children }: { children: ReactNode }) {
         JSON.stringify({ chats: prefs.saveHistory ? chats : [], prefs, demoSignedIn }),
       );
     } catch {
-      /* Private browsing may block storage. */
+      /* Modo anônimo pode bloquear o storage */
     }
   }, [chats, prefs, demoSignedIn, ready]);
+
   function stop() {
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = null;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     setPendingId(null);
   }
-  function send(text: string) {
-    if (!text.trim() || pendingId) return;
-    const id = activeId ?? crypto.randomUUID();
-    const message: ChatMessage = { id: crypto.randomUUID(), role: "user", text: text.trim() };
-    setChats((current) => {
-      if (current.some((chat) => chat.id === id))
-        return current.map((chat) =>
-          chat.id === id
-            ? { ...chat, updated: Date.now(), messages: [...chat.messages, message] }
-            : chat,
-        );
-      return [
-        { id, title: text.trim().slice(0, 45), updated: Date.now(), messages: [message] },
-        ...current,
-      ];
-    });
-    setActiveId(id);
-    setPendingId(id);
-    timer.current = setTimeout(() => {
-      const response: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        text: demoResponse(text, prefs),
+
+  async function send(text: string) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    let targetChatId = activeId;
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      text: trimmed,
+    };
+
+    // Cria um novo chat se nenhum estiver ativo
+    if (!targetChatId) {
+      targetChatId = `chat-${Date.now()}`;
+      const newChatObj: Chat = {
+        id: targetChatId,
+        title: trimmed.length > 30 ? `${trimmed.slice(0, 30)}…` : trimmed,
+        updated: Date.now(),
+        messages: [userMsg],
       };
-      setChats((current) =>
-        current.map((chat) =>
-          chat.id === id ? { ...chat, messages: [...chat.messages, response] } : chat,
+      setChats((prev) => [newChatObj, ...prev]);
+      setActiveId(targetChatId);
+    } else {
+      // Adiciona a mensagem do usuário ao chat atual
+      setChats((prev) =>
+        prev.map((c) =>
+          c.id === targetChatId
+            ? { ...c, updated: Date.now(), messages: [...c.messages, userMsg] }
+            : c,
         ),
       );
+    }
+
+    setPendingId(targetChatId);
+    abortControllerRef.current = new AbortController();
+
+    try {
+      const response = await fetch("https://yimiya.onrender.com/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: trimmed }),
+        signal: abortControllerRef.current.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro na API: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const botReply = data.reply || "Desculpe, não consegui obter uma resposta válida.";
+
+      const botMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        text: botReply,
+      };
+
+      setChats((prev) =>
+        prev.map((c) =>
+          c.id === targetChatId ? { ...c, messages: [...c.messages, botMsg] } : c,
+        ),
+      );
+    } catch (error: any) {
+      if (error.name === "AbortError") {
+        console.log("Requisição cancelada pelo usuário.");
+        return;
+      }
+
+      console.error("Erro na integração com o Render:", error);
+
+      const errorMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        text: " Ops! Não foi possível se conectar com o servidor da Miya. Verifique sua conexão e tente novamente.",
+      };
+
+      setChats((prev) =>
+        prev.map((c) =>
+          c.id === targetChatId ? { ...c, messages: [...c.messages, errorMsg] } : c,
+        ),
+      );
+    } finally {
       setPendingId(null);
-      timer.current = null;
-    }, 1100);
+      abortControllerRef.current = null;
+    }
   }
+
   return (
     <StoreContext.Provider
       value={{
@@ -244,7 +257,7 @@ export function YimiyaProvider({ children }: { children: ReactNode }) {
           try {
             localStorage.removeItem(STORAGE_KEY);
           } catch {
-            /* optional storage */
+            /* storage opcional */
           }
         },
         ready,
@@ -254,6 +267,7 @@ export function YimiyaProvider({ children }: { children: ReactNode }) {
     </StoreContext.Provider>
   );
 }
+
 export function useYimiya() {
   const context = useContext(StoreContext);
   if (!context) throw new Error("YimiyaProvider is required");
