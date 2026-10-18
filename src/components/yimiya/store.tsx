@@ -164,14 +164,13 @@ export function YimiyaProvider({ children }: { children: ReactNode }) {
     abortControllerRef.current = new AbortController();
 
     try {
-      const response = await fetch("https://yimiya.onrender.com", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: trimmed }),
-        signal: abortControllerRef.current.signal,
-      });
+      const response = await fetch("https://yimiya.onrender.com/api/chat", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ message: suaMensagem }),
+});
 
       if (!response.ok) {
         throw new Error(`Erro na API: ${response.statusText}`);
