@@ -164,7 +164,7 @@ export function YimiyaProvider({ children }: { children: ReactNode }) {
     abortControllerRef.current = new AbortController();
 
     try {
-      const response = await fetch("https://yimiya.onrender.com/api/chat", {
+      const response = await fetch("https://yimiya.onrender.com", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
