@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Miya AI</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0f0f12;
+      color: #e1e1e6;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Cabeçalho */
+    header {
+      padding: 1rem 2rem;
+      background-color: #18181c;
+      border-bottom: 1px solid #27272a;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      color: #e5484d;
+      font-weight: 700;
+    }
+
+    header span {
+      font-size: 0.8rem;
+      background-color: #27272a;
+      color: #4cc38a;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    /* Área de Mensagens */
+    #chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 0.8rem 1.2rem;
+      border-radius: 12px;
+      line-height: 1.5;
+      font-size: 0.95rem;
+      word-break: break-word;
+    }
+
+    .user-message {
+      align-self: flex-end;
+      background-color: #e5484d;
+      color: #ffffff;
+      border-bottom-right-radius: 2px;
+    }
+
+    .bot-message {
+      align-self: flex-start;
+      background-color: #27272a;
+      color: #f4f4f5;
+      border-bottom-left-radius: 2px;
+    }
+
+    /* Formulário / Input */
+    #chat-form {
+      display: flex;
+      padding: 1rem;
+      background-color: #18181c;
+      border-top: 1px solid #27272a;
+      gap: 0.5rem;
+    }
+
+    #user-input {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #27272a;
+      background-color: #0f0f12;
+      color: #ffffff;
+      outline: none;
+      font-size: 0.95rem;
+    }
+
+    #user-input:focus {
+      border-color: #e5484d;
+    }
+
+    button {
+      padding: 0.8rem 1.5rem;
+      background-color: #e5484d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #dc2626;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🌸 Miya AI</h1>
+    <span>Conectado</span>
+  </header>
+
+  <main id="chat-container">
+    <div class="message bot-message">
+      Olá! Eu sou a Miya. Como posso ajudar você hoje?
+    </div>
+  </main>
+
+  <form id="chat-form">
+    <input type="text" id="user-input" placeholder="Digite sua mensagem..." autocomplete="off" required>
+    <button type="submit" id="send-btn">Enviar</button>
+  </form>
+
+  <script src="script.js"></script>
+</body>
+</html>
