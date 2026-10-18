@@ -37,11 +37,13 @@ import {
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { AppShell, IconButton } from "./shell";
 import { useYimiya } from "./store";
+
 const suggestions = [
   { text: "Explique segurança de APIs", icon: Shield },
   { text: "Me ajude com Python", icon: Code2 },
   { text: "Analise esta vulnerabilidade", icon: Terminal },
 ];
+
 function Composer() {
   const { send, pendingId, stop } = useYimiya();
   const [input, setInput] = useState("");
@@ -87,21 +89,24 @@ function Composer() {
     </PromptInput>
   );
 }
+
 export function ChatPage() {
   const { chats, activeId, pendingId, send } = useYimiya();
   const current = chats.find((c) => c.id === activeId);
   const empty = !current?.messages.length;
   const [liked, setLiked] = useState<string[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
+
   async function copy(text: string, id: string) {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(id);
       setTimeout(() => setCopied(null), 1800);
     } catch {
-: "Conectado · Miya AI v1.0"}
+      toast.error("Não foi possível copiar. Tente selecionar o texto.");
     }
   }
+
   return (
     <AppShell chat>
       <div className="chat-body">
@@ -143,7 +148,7 @@ export function ChatPage() {
                   <ShieldCheck className="size-3" />
                   {current.example
                     ? "Conversa de exemplo"
-                    : "Demonstração · respostas ilustrativas, sem IA conectada"}
+                    : "Conectado · Miya AI v1.0"}
                 </div>
                 {current.messages.map((m) => (
                   <Message key={m.id} from={m.role}>
